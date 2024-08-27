@@ -1,60 +1,65 @@
 <!DOCTYPE html>
-<html lang="ch">
+<html lang="zh-CN">
+
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/index.css">
-  <title>总览</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人主页</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <h1 class="h_1">Albert_Kilonova</h1>
-  <hr>
-  <h3 class="h_1">目录卡片</h3>
-  <div class="div_hp">
-    <a href="子html/卡片左.html">
-    <span class="kp">
-      世界观
-      <hr>
-      <p1>星陨宇宙</p1>
-      <br>
-      <p1>光暗交叠</p1>
-    </span>
-    </a>
-    <a href="子html/卡片中.html">
-    <span id="zhong" class="kp">
-      ＞关于＜
-      <hr>
-      <p1>一名普通中专生</p1>
-      <br>
-      <p1>喜欢做动画</p1>
-      <br>
-      <p1>主要活跃在</p1>
-      <br>
-      <p1>画世界/QQ/微信</p1>
-      <br>
-      <p1>＞点我＜</p1>
-    </span>
-    </a>
-    <a href="子html/卡片右.html">
-    <span class="kp">
-      Albert_Kilonova
-      <hr>
-      <p1></p1>
-    </span>
-    </a>
-  </div>
-  <hr>
-  <h3 class="h_1">其他</h3>
-  <hr>
-  <div class="div_jan">
-    <span class="cl">
-      <p0>简介左</p0>
-    </span>
-    <span class="cl">
-      <p0>简介右</p0>
-    </span>
-  </div>
-  <script src="js/index.js"></script>
+    <!-- 个人信息标签 -->
+    <div class="info-tag">
+        <div class="avatar" style="background-image: url('https://s21.ax1x.com/2024/08/27/pAk7cfs.jpg');"></div>
+        <div class="separator"></div>
+        <div class="info-content">
+            <div class="basic-info">
+                <h3>Albert.Kilonova</h3>
+                <p>学生</p>
+            </div>
+            <div class="contact-info">
+                <p>山东, 中国</p>
+                <p>邮箱: Albert.Kilonova@gmail.com</p>
+                <p>QQ: 2294965955</p>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <h1>欢迎来到Albert_Kilonova的主页</h1>
+    </header>
+
+    <nav>
+        <a href="#about">关于</a>
+        <a href="#skills">作品</a>
+        <a href="#contact">联系</a>
+    </nav>
+
+    <section id="about">
+        <h2>关于</h2>
+        <p>你好！我是Albert_Kilonova，一名普通的学生，我对各领域都非常感兴趣，目前主要投入火柴人动画:P</p>
+    </section>
+
+    <section id="skills">
+        <h2>作品</h2>
+        <ul class="skills">
+            <li>暂无</li>
+            <li>暂无</li>
+            <li>暂无</li>
+        </ul>
+    </section>
+
+    <section id="contact">
+        <h2>联系</h2>
+        <ul class="contact-info">
+            <li>邮箱: <a href="mailto:Albert.Kilonova@gmail.com">Albert.Kilonova@gmail.com</a></li>
+            <li>QQ: 2294965955</li>
+            <li>X: <a href="https://x.com/AKilonova17598">AKilonova17598</a></li>
+            <li>Discord: <a href="https://discord.com/channels/@Albert.Kilonova">AlbertKilonova</a></li>
+        </ul>
+    </section>
+    <script src="script.js"></script>
 </body>
+
 </html>
