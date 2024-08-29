@@ -7,6 +7,10 @@
     transition: all 0.3s ease;
 }
 
+html {
+  scroll-behavior:smooth
+}
+
 body {
     background-color: #1c1c1c;
     color: #cccccc;
