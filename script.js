@@ -50,12 +50,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           break;
 
         case 'contact-list':
-          content = section.items.map(item => `
-            <li>${item.label}: ${
-              item.link ? `<a href="${item.link}" ${item.type === 'email' ? '' : 'target="_blank"'} rel="noopener noreferrer">${item.value}</a>` : item.value
-            }</li>
-          `).join('');
-          break;
+           content = section.items.map(item => `
+             <li>${item.label}: ${
+               item.link ? 
+                 `<a href="${item.link}" ${item.type === 'email' ? '' : 'target="_blank"'} rel="noopener noreferrer">${item.value}</a>` : 
+                 item.value
+             }</li>
+           `).join('');
+           break;
 
         case 'link-list':
           content = section.items.map(item => `
