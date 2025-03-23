@@ -43,14 +43,19 @@
         "link": "mailto:Albert.Kilonova@gmail.com"
       },
       {
-        "label": "QQ", 
+        "label": "QQ_Android", 
+        "value": "2294965955",
+        "link": "mqqwpa://im/chat?chat_type=wpa&uin=2294965955&version=1&src_type=web"
+      },
+      {
+        "label": "QQ_PC",
         "value": "2294965955",
         "link": "tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=2294965955"
       },
       { 
-        "label": "Q群", 
+        "label": "QQ群", 
         "value": "1001363193", 
-        "link": "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=z5bUCC1lvAQuAn3J_-n96sR2KJlLAHcf" 
+        "link": "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=ca0kZ5jBI60UD2V8OzZwJ3YrwL0pvuKY&authKey=uoUNc%2F2CihzqLw4beRJMa4RjgK5mrxPGkJc3vq5saiJRRtaGTS33v1U%2BHgeJmcAm&noverify=0&group_code=1001363193" 
       },
       { 
         "label": "X", 
