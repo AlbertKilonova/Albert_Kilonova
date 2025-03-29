@@ -23,7 +23,24 @@
   {
     "id": "about",
     "title": "关于",
-    "content": "<iframe frameborder='no' border='0' marginwidth='0' marginheight='0' width=100% height=80 src='//music.163.com/outchain/player?type=2&id=28195194&auto=1&height=66'></iframe><br/>你好！我是Albert_Kilonova，一名普通的学生，我对各领域都非常感兴趣，目前主要投入火柴人动画:P<br/>这是我的bilibili账号：<a href='https://space.bilibili.com/698493476'>Albert_Kilonova</a><br/>友链：<a href='https://anming-cat.pages.dev/'>Anming_cat</a>"
+    "type": "compound",
+    "blocks": [
+      {
+        "type": "text",
+        "content": "<p>你好！我是Albert_Kilonova，一名普通的学生，我对各领域都非常感兴趣，目前主要投入火柴人动画:P<br/>这是我的bilibili账号：<a href='https://space.bilibili.com/698493476'>Albert_Kilonova</a><br/>友链：<a href='https://anming-cat.pages.dev/'>Anming_cat</a></p>"
+      },
+      {
+        "type": "music",
+        "songs": [
+          {"id": "28195194", "title": "Tall It’s Over"},
+          {"id": "30394495", "title": "Stray"},
+          {"id": "34723614", "title": "Faster Than Light"},
+          {"id": "36308071", "title": "Faster Than Light"},
+          {"id": "415793340", "title": "Faster Than Light"},
+          {"id": "1393259804", "title": "Faster Than Light"}
+        ]
+      }
+      ]
   },
   {
     "id": "works",
