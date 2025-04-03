@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <li class="resource-item">
               <div class="link-decoration"></div>
               <a href="${item.link}" target="_blank" rel="noopener noreferrer">
-                <span class="link-icon">📁</span>
+                <span class="link-icon">❖</span>
                 <span class="link-text">${item.text}</span>
               </a>
             </li>

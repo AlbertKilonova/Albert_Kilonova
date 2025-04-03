@@ -106,6 +106,17 @@
     ]
   },
   {
+    "id":"tool",
+    "title": "工具",
+    "type": "link-list",
+    "items": [
+      {
+        "text": "色卡生成器",
+        "link": "/tool/Colors.html"
+      }
+    ]
+  },
+  {
     "id": "resource",
     "title": "资源分享",
     "type": "link-list",
@@ -151,6 +162,10 @@
   {
     "text": "联系",
     "href": "#contact"
+  },
+  {
+    "text": "工具",
+    "href": "#tool"
   },
   {
     "text": "资源",
