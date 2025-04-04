@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="纯前端工具箱，包含多种实用开发工具">
-    <meta name="theme-color" content="#3498db">
+    <!-- 保持原有meta标签 -->
     <title>前端工具箱</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/themes.css" id="theme-style">
-    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div class="container">
@@ -64,12 +60,19 @@
         </div>
     </div>
     
-    <!-- 加载所有JavaScript文件 -->
-    <script src="js/utils/storage.js" type="module"></script>
-    <script src="js/utils/themeSwitcher.js" type="module"></script>
-    <script src="js/tools/jsonFormatter.js" type="module"></script>
-    <script src="js/tools/base64Converter.js" type="module"></script>
-    <script src="js/tools/colorConverter.js" type="module"></script>
-    <script src="js/app.js" type="module"></script>
+<!-- 加载工具脚本 -->
+    <script src="js/utils/storage.js"></script>
+    <!-- 主应用逻辑 -->
+    <script src="js/app.js"></script>
+    <!-- 工具模块 -->
+    <script src="js/tools/jsonFormatter.js"></script>
+    <script src="js/tools/base64Converter.js"></script>
+    <script src="js/tools/colorConverter.js"></script>
+    <script src="js/tools/urlParser.js"></script>
+    <script src="js/tools/timestampConverter.js"></script>
+    
+    <script src="js/utils/themeSwitcher.js"></script>
+    <script src="js/utils/a11y.js"></script>
+    <script src="js/utils/pwa.js"></script>
 </body>
 </html>
