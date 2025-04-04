@@ -125,6 +125,17 @@
     ]
   },
   {
+    "id":"games",
+    "title": "游戏",
+    "type": "link-list",
+    "items": [
+      {
+        "text": "介绍",
+        "link": "/games/help.html"
+      }
+    ]
+  },
+  {
     "id": "resource",
     "title": "资源分享",
     "type": "link-list",
@@ -160,20 +171,16 @@
   }],
   "nav": [
   {
-    "text": "关于",
-    "href": "#about"
-  },
-  {
-    "text": "作品",
-    "href": "#works"
-  },
-  {
     "text": "联系",
     "href": "#contact"
   },
   {
     "text": "工具",
-    "href": "#tool"
+    "href": "#tools"
+  },
+  {
+    "text": "游戏",
+    "href": "#games"
   },
   {
     "text": "资源",
