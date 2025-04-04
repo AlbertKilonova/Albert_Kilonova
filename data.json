@@ -113,6 +113,10 @@
       {
         "text": "色卡生成器",
         "link": "/tools/Colors.html"
+      },
+      {
+        "text": "模拟钢琴",
+        "link": "/tools/Analog_piano.html"
       }
     ]
   },
