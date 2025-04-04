@@ -106,11 +106,14 @@
     ]
   },
   {
-    "id":"tool",
+    "id":"tools",
     "title": "工具",
     "type": "link-list",
     "items": [
-      
+      {
+        "text": "介绍",
+        "link": "/tools/help.html"
+      },
       {
         "text": "色卡生成器",
         "link": "/tools/Colors.html"
