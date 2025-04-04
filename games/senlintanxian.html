@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林探险</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 800px;
+            padding: 20px;
+        }
+        .game-title {
+            text-align: center;
+            color: #2e7d32;
+            margin-bottom: 20px;
+        }
+        .game-content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #388e3c;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .inventory {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .inventory h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .inventory-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .item {
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        .health-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .health-fill {
+            height: 100%;
+            background-color: #4caf50;
+            width: 100%;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">森林探险</h1>
+        
+        <div class="status-bar">
+            <div>
+                <strong>生命值:</strong> <span id="health">100</span>
+                <div class="health-bar">
+                    <div class="health-fill" id="health-bar"></div>
+                </div>
+            </div>
+            <div>
+                <strong>位置:</strong> <span id="location">森林入口</span>
+            </div>
+        </div>
+        
+        <div class="game-content" id="story">
+            欢迎来到森林探险！你醒来发现自己在一个神秘的森林中，四周是茂密的树木和奇异的植物。
+            你记得自己似乎是在一次徒步旅行中迷路了。现在，你需要找到回家的路。
+        </div>
+        
+        <div class="options" id="options">
+            <button onclick="goToScene('path')">沿着小路前进</button>
+            <button onclick="goToScene('forest')">深入森林探索</button>
+            <button onclick="goToScene('river')">跟随溪流方向</button>
+        </div>
+        
+        <div class="inventory">
+            <h3>物品栏</h3>
+            <div class="inventory-items" id="inventory">
+                <div class="item">手机（没信号）</div>
+                <div class="item">水壶</div>
+                <div class="item">指南针</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let health = 100;
+        let inventory = ['手机（没信号）', '水壶', '指南针'];
+        let currentScene = 'start';
+
+        function updateHealth(newHealth) {
+            health = Math.max(0, Math.min(100, newHealth));
+            document.getElementById('health').textContent = health;
+            document.getElementById('health-bar').style.width = health + '%';
+            
+            if (health <= 30) {
+                document.getElementById('health-bar').style.backgroundColor = '#f44336';
+            } else if (health <= 60) {
+                document.getElementById('health-bar').style.backgroundColor = '#ff9800';
+            } else {
+                document.getElementById('health-bar').style.backgroundColor = '#4caf50';
+            }
+        }
+
+        function addToInventory(item) {
+            if (!inventory.includes(item)) {
+                inventory.push(item);
+                const inventoryElement = document.getElementById('inventory');
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item';
+                itemElement.textContent = item;
+                inventoryElement.appendChild(itemElement);
+            }
+        }
+
+        function updateLocation(location) {
+            document.getElementById('location').textContent = location;
+        }
+
+        function goToScene(sceneName) {
+            const storyElement = document.getElementById('story');
+            const optionsElement = document.getElementById('options');
+            
+            // 清除之前的选项
+            optionsElement.innerHTML = '';
+            
+            switch(sceneName) {
+                case 'start':
+                    storyElement.textContent = "你站在森林的入口，阳光透过树叶洒下斑驳的光影。你记得自己似乎是在一次徒步旅行中迷路了。现在，你需要找到回家的路。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('path')">沿着小路前进</button>
+                        <button onclick="goToScene('forest')">深入森林探索</button>
+                        <button onclick="goToScene('river')">跟随溪流方向</button>
+                    `;
+                    updateLocation("森林入口");
+                    break;
+                
+                case 'path':
+                    storyElement.textContent = "你沿着小路前进，小路两旁是高大的树木。突然，你看到前方有两条分叉路：一条向左，一条向右。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('leftPath')">向左走</button>
+                        <button onclick="goToScene('rightPath')">向右走</button>
+                        <button onclick="goToScene('start')">返回入口</button>
+                    `;
+                    updateLocation("分叉路口");
+                    break;
+                
+                case 'leftPath':
+                    storyElement.textContent = "你选择了左边的小路。走了不久，你发现了一座古老的石桥，桥下是一条湍急的河流。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('crossBridge')">过桥</button>
+                        <button onclick="goToScene('followRiver')">沿着河岸走</button>
+                        <button onclick="goToScene('path')">返回分叉路口</button>
+                    `;
+                    updateLocation("石桥");
+                    break;
+                
+                case 'crossBridge':
+                    storyElement.textContent = "你小心翼翼地走过摇摇欲坠的石桥。突然，桥板断裂，你险些掉入河中！你抓住了桥边的藤蔓，但受了点伤。";
+                    updateHealth(health - 15);
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('village')">继续前进</button>
+                        <button onclick="goToScene('path')">返回分叉路口</button>
+                    `;
+                    updateLocation("桥的另一端");
+                    break;
+                
+                case 'village':
+                    storyElement.textContent = "穿过桥后，你发现了一个古老的小村庄。村民们看起来很友好，他们给了你食物和水，并告诉你如何回到文明地区。";
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">接受帮助，回家</button>
+                        <button onclick="goToScene('exploreVillage')">探索村庄</button>
+                    `;
+                    updateLocation("古老村庄");
+                    break;
+                
+                case 'exploreVillage':
+                    storyElement.textContent = "你决定探索这个神秘的村庄。在村中央，你发现了一座古老的祭坛，上面刻着奇怪的符号。突然，地面开始震动，祭坛释放出一道光芒！";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('hiddenTreasure')">靠近祭坛</button>
+                        <button onclick="goToScene('village')">离开祭坛</button>
+                    `;
+                    updateLocation("村庄祭坛");
+                    break;
+                
+                case 'hiddenTreasure':
+                    storyElement.textContent = "你靠近祭坛，光芒变得更加强烈。祭坛突然打开，露出一个装满金币和宝石的宝箱！但同时，你也触发了陷阱，被石头砸伤了。";
+                    updateHealth(health - 20);
+                    addToInventory("古代金币");
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">带着宝藏回家</button>
+                        <button onclick="goToScene('village')">留在村庄</button>
+                    `;
+                    updateLocation("宝藏所在地");
+                    break;
+                
+                case 'rightPath':
+                    storyElement.textContent = "你选择了右边的小路。不久，你进入了一片茂密的灌木丛，几乎无法前进。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('clearPath')">清理一条路</button>
+                        <button onclick="goToScene('turnBack')">返回分叉路口</button>
+                    `;
+                    updateLocation("灌木丛");
+                    break;
+                
+                case 'clearPath':
+                    storyElement.textContent = "你用树枝清理出一条路。突然，你听到身后有动静！一只野生的狼出现了，它看起来很饿。";
+                    optionsElement.innerHTML = `
+                        <button onclick="fightWolf()">与狼战斗</button>
+                        <button onclick="runFromWolf()">逃跑</button>
+                    `;
+                    updateLocation("灌木丛");
+                    break;
+                
+                case 'fightWolf':
+                    storyElement.textContent = "你勇敢地面对狼，但它的攻击太快了！你受了重伤，但设法用一根尖锐的树枝刺中了它。";
+                    updateHealth(health - 30);
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('wolfDefeated')">继续前进</button>
+                    `;
+                    updateLocation("狼的领地");
+                    break;
+                
+                case 'runFromWolf':
+                    storyElement.textContent = "你转身逃跑，狼紧追不舍！幸运的是，你找到了一个树洞躲藏起来，狼最终失去了兴趣。";
+                    updateHealth(health - 10);
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('treeHollow')">探索树洞</button>
+                        <button onclick="goToScene('rightPath')">返回灌木丛</button>
+                    `;
+                    updateLocation("树洞");
+                    break;
+                
+                case 'wolfDefeated':
+                    storyElement.textContent = "狼倒下了，你检查了它的尸体，发现它的项圈上有一个奇怪的标记。";
+                    addToInventory("狼皮");
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('hiddenCave')">继续前进</button>
+                    `;
+                    updateLocation("狼的领地");
+                    break;
+                
+                case 'hiddenCave':
+                    storyElement.textContent = "你继续前进，发现了一个隐藏的山洞。洞口被藤蔓遮挡，看起来很少有人来过。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('enterCave')">进入山洞</button>
+                        <button onclick="goToScene('rightPath')">返回灌木丛</button>
+                    `;
+                    updateLocation("山洞入口");
+                    break;
+                
+                case 'enterCave':
+                    storyElement.textContent = "你进入山洞，里面很黑暗。你拿出手机当手电筒，发现洞壁上有一些古老的壁画。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('exploreCave')">深入探索</button>
+                        <button onclick="goToScene('hiddenCave')">返回洞口</button>
+                    `;
+                    updateLocation("山洞内部");
+                    break;
+                
+                case 'exploreCave':
+                    storyElement.textContent = "你深入山洞，发现了一个宽敞的地下大厅，中央有一个发光的水晶。当你触碰水晶时，它开始发光，洞穴开始震动！";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('crystalPower')">吸收水晶力量</button>
+                        <button onclick="goToScene('fleeCave')">逃离洞穴</button>
+                    `;
+                    updateLocation("水晶大厅");
+                    break;
+                
+                case 'crystalPower':
+                    storyElement.textContent = "你吸收了水晶的力量，感觉一股能量流遍全身！但洞穴的震动变得更加强烈，你必须赶紧离开！";
+                    addToInventory("水晶碎片");
+                    updateHealth(health + 20); // 恢复生命值
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('exitCave')">逃离洞穴</button>
+                    `;
+                    updateLocation("水晶大厅");
+                    break;
+                
+                case 'fleeCave':
+                    storyElement.textContent = "你赶紧逃离洞穴，就在你出来的一瞬间，洞穴坍塌了！你松了一口气，但感到有些失望，因为你没有发现任何有价值的东西。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('rightPath')">返回灌木丛</button>
+                    `;
+                    updateLocation("山洞入口");
+                    break;
+                
+                case 'exitCave':
+                    storyElement.textContent = "你成功逃离了洞穴，带着水晶的力量，你感到精力充沛！现在你可以更容易找到回家的路了。";
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">回家</button>
+                    `;
+                    updateLocation("森林边缘");
+                    break;
+                
+                case 'forest':
+                    storyElement.textContent = "你决定深入森林探索。树木越来越密集，阳光几乎无法穿透。突然，你听到了奇怪的声音。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('followSound')">跟随声音</button>
+                        <button onclick="goToScene('climbTree')">爬上树观察</button>
+                        <button onclick="goToScene('start')">返回入口</button>
+                    `;
+                    updateLocation("森林深处");
+                    break;
+                
+                case 'followSound':
+                    storyElement.textContent = "你跟随声音，发现了一群友好的精灵！他们正在举行一个仪式，邀请你加入。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('joinElves')">加入仪式</button>
+                        <button onclick="goToScene('observeElves')">观察但不参与</button>
+                    `;
+                    updateLocation("精灵营地");
+                    break;
+                
+                case 'joinElves':
+                    storyElement.textContent = "你加入了精灵的仪式，他们感谢你的参与，并赠予你一些魔法物品。他们还告诉你如何离开森林。";
+                    addToInventory("精灵魔法药水");
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">带着礼物回家</button>
+                        <button onclick="goToScene('forest')">继续探索</button>
+                    `;
+                    updateLocation("精灵营地");
+                    break;
+                
+                case 'observeElves':
+                    storyElement.textContent = "你悄悄观察仪式，但被精灵们发现了。他们认为你是个间谍，对你发起了攻击！";
+                    updateHealth(health - 25);
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('escapeElves')">逃跑</button>
+                    `;
+                    updateLocation("精灵营地");
+                    break;
+                
+                case 'escapeElves':
+                    storyElement.textContent = "你设法逃脱了精灵的追捕，但受了伤。你决定不再深入森林，而是寻找其他出路。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('start')">返回入口</button>
+                    `;
+                    updateLocation("森林边缘");
+                    break;
+                
+                case 'climbTree':
+                    storyElement.textContent = "你爬上一棵大树，从高处观察森林。你发现了一个湖泊，湖边似乎有建筑物的轮廓。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('descendTree')">下树前往湖泊</button>
+                        <button onclick="goToScene('start')">返回入口</button>
+                    `;
+                    updateLocation("树顶");
+                    break;
+                
+                case 'descendTree':
+                    storyElement.textContent = "你下树后，向湖泊方向前进。到达湖边时，你发现了一个古老的神庙，部分浸没在水中。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('enterTemple')">进入神庙</button>
+                        <button onclick="goToScene('followShore')">沿着湖岸走</button>
+                    `;
+                    updateLocation("湖边");
+                    break;
+                
+                case 'enterTemple':
+                    storyElement.textContent = "你进入神庙，发现里面布满了陷阱和谜题。你小心地通过了陷阱，发现了一个装有神秘物品的祭坛。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('takeArtifact')">拿走物品</button>
+                        <button onclick="goToScene('leaveTemple')">离开神庙</button>
+                    `;
+                    updateLocation("神庙内部");
+                    break;
+                
+                case 'takeArtifact':
+                    storyElement.textContent = "你拿走了祭坛上的神秘物品，突然整个神庙开始坍塌！你设法逃了出去，但受了点伤。";
+                    updateHealth(health - 15);
+                    addToInventory("神秘护身符");
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('lake')">逃离神庙</button>
+                    `;
+                    updateLocation("神庙入口");
+                    break;
+                
+                case 'leaveTemple':
+                    storyElement.textContent = "你决定不拿走任何东西，安全地离开了神庙。虽然没有得到宝藏，但你保住了性命。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('lake')">离开神庙</button>
+                    `;
+                    updateLocation("神庙入口");
+                    break;
+                
+                case 'lake':
+                    storyElement.textContent = "你离开了神庙，沿着湖岸走，发现了一条小船。你可以用它横渡湖泊。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('crossLake')">划船横渡湖泊</button>
+                        <button onclick="goToScene('followShore')">继续沿着湖岸走</button>
+                    `;
+                    updateLocation("湖边");
+                    break;
+                
+                case 'crossLake':
+                    storyElement.textContent = "你划船横渡湖泊，到达了对岸。那里有一条通往城镇的道路！";
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">沿着道路回家</button>
+                    `;
+                    updateLocation("湖对岸");
+                    break;
+                
+                case 'followShore':
+                    storyElement.textContent = "你沿着湖岸走，发现了一个小村庄。村民们热情地接待了你，并帮助你找到了回家的路。";
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">接受帮助，回家</button>
+                    `;
+                    updateLocation("湖边村庄");
+                    break;
+                
+                case 'river':
+                    storyElement.textContent = "你决定跟随溪流方向走。溪流逐渐变宽，变成了小河。你发现河岸边有一些脚印。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('followFootprints')">跟随脚印</button>
+                        <button onclick="goToScene('crossRiver')">过河</button>
+                        <button onclick="goToScene('start')">返回入口</button>
+                    `;
+                    updateLocation("河边");
+                    break;
+                
+                case 'followFootprints':
+                    storyElement.textContent = "你跟随脚印，发现它们通向一个山洞。山洞里似乎有光亮透出。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('enterCave')">进入山洞</button>
+                        <button onclick="goToScene('river')">返回河边</button>
+                    `;
+                    updateLocation("山洞入口");
+                    break;
+                
+                case 'crossRiver':
+                    storyElement.textContent = "你试图过河，但水流湍急。你被冲走了一段距离，但设法抓住了一根漂浮的木头。";
+                    updateHealth(health - 10);
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('downstream')">顺流而下</button>
+                    `;
+                    updateLocation("河中");
+                    break;
+                
+                case 'downstream':
+                    storyElement.textContent = "你顺流而下，最终被冲到了一个瀑布下方的水潭中。幸运的是，你没有受伤。";
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('waterfall')">探索瀑布</button>
+                        <button onclick="goToScene('climbOut')">爬上岸</button>
+                    `;
+                    updateLocation("瀑布下方");
+                    break;
+                
+                case 'waterfall':
+                    storyElement.textContent = "你发现瀑布后面有一个隐藏的通道！通道里有一个小房间，里面有一张地图和一些补给品。";
+                    addToInventory("古老地图");
+                    addToInventory("食物补给");
+                    optionsElement.innerHTML = `
+                        <button onclick="goToScene('secretRoom')">探索房间</button>
+                        <button onclick="goToScene('climbOut')">离开瀑布</button>
+                    `;
+                    updateLocation("瀑布后面");
+                    break;
+                
+                case 'secretRoom':
+                    storyElement.textContent = "你在房间里发现了一些古代文字，描述了森林的秘密和通往安全地带的路线。";
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">按照地图回家</button>
+                    `;
+                    updateLocation("秘密房间");
+                    break;
+                
+                case 'climbOut':
+                    storyElement.textContent = "你爬上岸，发现自己在一个风景优美的山谷中。远处可以看到城镇的轮廓。";
+                    optionsElement.innerHTML = `
+                        <button onclick="gameWin()">前往城镇</button>
+                    `;
+                    updateLocation("山谷");
+                    break;
+                
+                case 'gameOver':
+                    storyElement.textContent = "你失去了所有的生命值，倒在了森林中。游戏结束！";
+                    optionsElement.innerHTML = `
+                        <button onclick="restartGame()">重新开始</button>
+                    `;
+                    break;
+            }
+            
+            // 检查生命值是否为0
+            if (health <= 0) {
+                goToScene('gameOver');
+            }
+        }
+
+        function gameWin() {
+            const storyElement = document.getElementById('story');
+            const optionsElement = document.getElementById('options');
+            
+            storyElement.textContent = "恭喜你成功逃离了森林！你找到了回家的路，并带着你在冒险中获得的物品安全返回。";
+            optionsElement.innerHTML = `
+                <button onclick="restartGame()">重新开始</button>
+            `;
+        }
+
+        function restartGame() {
+            health = 100;
+            inventory = ['手机（没信号）', '水壶', '指南针'];
+            updateHealth(100);
+            
+            // 重置物品栏
+            const inventoryElement = document.getElementById('inventory');
+            inventoryElement.innerHTML = '';
+            inventory.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item';
+                itemElement.textContent = item;
+                inventoryElement.appendChild(itemElement);
+            });
+            
+            goToScene('start');
+        }
+    </script>
+</body>
+</html>
