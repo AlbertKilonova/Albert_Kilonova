@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Forest</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #111;
+            color: #ccc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-container {
+            background-color: #222;
+            border: 2px solid #444;
+            width: 800px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .game-title {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        .game-content {
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            min-height: 150px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-radius: 5px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-weight: bold;
+            color: #999;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #333;
+            color: #ccc;
+            border: 1px solid #555;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background-color: #444;
+            color: #fff;
+        }
+        button:disabled {
+            background-color: #222;
+            color: #555;
+            cursor: not-allowed;
+        }
+        .inventory {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .inventory h3 {
+            margin-top: 0;
+            color: #999;
+            font-size: 16px;
+        }
+        .inventory-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .item {
+            background-color: #333;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        .notification {
+            color: #ff9900;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none;
+        }
+        .game-over {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .game-over h2 {
+            color: #ff3333;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">Dark Forest</h1>
+        
+        <div class="stats">
+            <div class="stat">
+                <div>Health</div>
+                <div class="stat-value" id="health">100</div>
+            </div>
+            <div class="stat">
+                <div>Hunger</div>
+                <div class="stat-value" id="hunger">100</div>
+            </div>
+            <div class="stat">
+                <div>Strength</div>
+                <div class="stat-value" id="strength">5</div>
+            </div>
+            <div class="stat">
+                <div>Level</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+        </div>
+        
+        <div class="game-content" id="story">
+            你醒来时发现自己身处一片黑暗的森林中。你记得自己似乎是在一次探险中迷路了。现在，你必须找到出路并生存下去。
+        </div>
+        
+        <div class="options" id="options">
+            <button onclick="explore()">探索周围</button>
+            <button onclick="rest()">休息片刻</button>
+            <button onclick="hunt()">狩猎食物</button>
+            <button onclick="checkInventory()">查看物品</button>
+        </div>
+        
+        <div class="inventory" id="inventory">
+            <h3>物品栏</h3>
+            <div class="inventory-items" id="inventory-items">
+                <div class="item">旧刀</div>
+                <div class="item">干粮 (x3)</div>
+                <div class="item">水壶</div>
+            </div>
+        </div>
+        
+        <div class="notification" id="notification"></div>
+        
+        <div class="game-over hidden" id="game-over">
+            <h2>游戏结束</h2>
+            <p id="game-over-reason"></p>
+            <button onclick="restartGame()">重新开始</button>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            health: 100,
+            hunger: 100,
+            strength: 5,
+            level: 1,
+            experience: 0,
+            inventory: ['旧刀', '干粮 (x3)', '水壶'],
+            location: '森林入口',
+            day: 1,
+            exploredAreas: [],
+            hasFire: false,
+            hasShelter: false
+        };
+
+        // 游戏定时器
+        let gameTimer;
+
+        // 初始化游戏
+        function initGame() {
+            updateStats();
+            startGameTimer();
+        }
+
+        // 开始游戏定时器
+        function startGameTimer() {
+            gameTimer = setInterval(() => {
+                updateHunger();
+                checkGameState();
+            }, 10000); // 每10秒更新一次
+        }
+
+        // 更新饥饿值
+        function updateHunger() {
+            gameState.hunger -= 5;
+            if (gameState.hunger < 0) gameState.hunger = 0;
+            
+            if (gameState.hunger < 30) {
+                gameState.health -= 5;
+                showNotification("饥饿正在削弱你的体力！");
+            }
+            
+            updateStats();
+            checkGameState();
+        }
+
+        // 更新状态显示
+        function updateStats() {
+            document.getElementById('health').textContent = gameState.health;
+            document.getElementById('hunger').textContent = gameState.hunger;
+            document.getElementById('strength').textContent = gameState.strength;
+            document.getElementById('level').textContent = gameState.level;
+            
+            // 更新物品栏
+            const inventoryElement = document.getElementById('inventory-items');
+            inventoryElement.innerHTML = '';
+            gameState.inventory.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item';
+                itemElement.textContent = item;
+                inventoryElement.appendChild(itemElement);
+            });
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const notificationElement = document.getElementById('notification');
+            notificationElement.textContent = message;
+            notificationElement.classList.remove('hidden');
+            
+            setTimeout(() => {
+                notificationElement.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 检查游戏状态
+        function checkGameState() {
+            if (gameState.health <= 0) {
+                endGame("你因伤势过重而倒下了。");
+            } else if (gameState.hunger <= 0) {
+                endGame("你因饥饿而失去了意识。");
+            }
+        }
+
+        // 结束游戏
+        function endGame(reason) {
+            clearInterval(gameTimer);
+            document.getElementById('story').textContent = "游戏结束！你未能在森林中生存下来。";
+            document.getElementById('options').innerHTML = '';
+            document.getElementById('game-over-reason').textContent = reason;
+            document.getElementById('game-over').classList.remove('hidden');
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            gameState.health = 100;
+            gameState.hunger = 100;
+            gameState.strength = 5;
+            gameState.level = 1;
+            gameState.experience = 0;
+            gameState.inventory = ['旧刀', '干粮 (x3)', '水壶'];
+            gameState.location = '森林入口';
+            gameState.day = 1;
+            gameState.exploredAreas = [];
+            gameState.hasFire = false;
+            gameState.hasShelter = false;
+            
+            document.getElementById('story').textContent = "你再次醒来，发现自己身处一片黑暗的森林中。";
+            document.getElementById('game-over').classList.add('hidden');
+            updateStats();
+            startGameTimer();
+            
+            const optionsElement = document.getElementById('options');
+            optionsElement.innerHTML = `
+                <button onclick="explore()">探索周围</button>
+                <button onclick="rest()">休息片刻</button>
+                <button onclick="hunt()">狩猎食物</button>
+                <button onclick="checkInventory()">查看物品</button>
+            `;
+        }
+
+        // 探索周围
+        function explore() {
+            const locations = [
+                "一片茂密的灌木丛",
+                "一条小溪",
+                "一片空地",
+                "一堆废弃的营火",
+                "一片树林",
+                "一个山洞入口"
+            ];
+            
+            let location = locations[Math.floor(Math.random() * locations.length)];
+            
+            let event = "";
+            let outcome = "";
+            
+            // 随机事件
+            const rand = Math.random();
+            
+            if (rand < 0.3) {
+                // 发现物品
+                const items = ["浆果", "蘑菇", "干柴", "小刀", "绳子", "金属碎片", "旧地图"];
+                const item = items[Math.floor(Math.random() * items.length)];
+                
+                if (!gameState.inventory.includes(item)) {
+                    gameState.inventory.push(item);
+                    outcome = `你找到了一个有用的物品：${item}！`;
+                } else {
+                    outcome = "你找到了一些重复的物品，但你已经有一个了。";
+                }
+            } else if (rand < 0.6) {
+                // 遇到动物
+                const animals = ["野兔", "松鼠", "狐狸", "狼"];
+                const animal = animals[Math.floor(Math.random() * animals.length)];
+                
+                if (animal === "狼" && Math.random() < 0.5) {
+                    gameState.health -= 15;
+                    outcome = `你遇到了一只凶猛的狼！它攻击了你，你受了伤。`;
+                } else {
+                    outcome = `你看到了一只${animal}，但它很快逃走了。`;
+                }
+            } else {
+                // 特殊事件
+                const events = [
+                    "你发现了一个古老的符号刻在树上，似乎指向某个方向。",
+                    "你听到了远处的雷声，一场暴风雨即将来临。",
+                    "你发现了一些脚印，似乎是人类的。",
+                    "你发现了一块奇怪的石头，上面有发光的纹理。"
+                ];
+                event = events[Math.floor(Math.random() * events.length)];
+                outcome = event;
+            }
+            
+            gameState.location = location;
+            gameState.exploredAreas.push(location);
+            
+            document.getElementById('story').textContent = `你正在探索${location}...\n\n${outcome}`;
+        }
+
+        // 休息片刻
+        function rest() {
+            gameState.health += 10;
+            if (gameState.health > 100) gameState.health = 100;
+            
+            if (gameState.hasShelter) {
+                gameState.hunger -= 5; // 在庇护所休息会消耗更多食物
+            } else {
+                gameState.hunger -= 10;
+            }
+            
+            if (gameState.hunger < 0) gameState.hunger = 0;
+            
+            const restOutcome = gameState.hasShelter ? 
+                "你在自制的庇护所中休息，感觉好多了。" : 
+                "你找了个舒适的地方休息，恢复了一些体力。";
+            
+            document.getElementById('story').textContent = restOutcome;
+            updateStats();
+        }
+
+        // 狩猎食物
+        function hunt() {
+            if (gameState.inventory.includes("陷阱")) {
+                const huntSuccess = Math.random() < 0.7;
+                let outcome = "";
+                
+                if (huntSuccess) {
+                    const foods = ["野兔", "松鼠", "鸟", "鱼"];
+                    const food = foods[Math.floor(Math.random() * foods.length)];
+                    gameState.inventory.push(`${food}肉`);
+                    outcome = `你成功捕获了一只${food}！现在你有了${food}肉可以吃。`;
+                } else {
+                    outcome = "你的陷阱没有捕获到任何东西。狩猎失败了。";
+                }
+                
+                document.getElementById('story').textContent = outcome;
+            } else {
+                const huntSuccess = Math.random() < 0.4;
+                let outcome = "";
+                
+                if (huntSuccess) {
+                    const foods = ["浆果", "蘑菇", "坚果", "昆虫"];
+                    const food = foods[Math.floor(Math.random() * foods.length)];
+                    gameState.inventory.push(food);
+                    outcome = `你找到了一些${food}！现在你可以吃它来恢复饥饿值。`;
+                } else {
+                    outcome = "你没有找到任何可以吃的东西。狩猎失败了。";
+                    gameState.hunger -= 10;
+                }
+                
+                document.getElementById('story').textContent = outcome;
+                updateStats();
+            }
+        }
+
+        // 检查物品栏
+        function checkInventory() {
+            let inventoryText = "你的物品栏：\n";
+            
+            if (gameState.inventory.length === 0) {
+                inventoryText += "你的物品栏是空的。";
+            } else {
+                inventoryText += gameState.inventory.join(", ");
+            }
+            
+            inventoryText += "\n\n你可以使用以下命令：\n";
+            inventoryText += "- 'use [物品]'：使用物品\n";
+            inventoryText += "- 'craft [物品]'：制作物品\n";
+            inventoryText += "- 'build [结构]'：建造结构\n";
+            
+            document.getElementById('story').textContent = inventoryText;
+            
+            // 更新按钮
+            const optionsElement = document.getElementById('options');
+            optionsElement.innerHTML = `
+                <button onclick="useItem()">使用物品</button>
+                <button onclick="craftItem()">制作物品</button>
+                <button onclick="buildStructure()">建造结构</button>
+                <button onclick="backToMain()">返回</button>
+            `;
+        }
+
+        // 使用物品
+        function useItem() {
+            if (gameState.inventory.length === 0) {
+                document.getElementById('story').textContent = "你的物品栏是空的。";
+                return;
+            }
+            
+            let itemOptions = "";
+            gameState.inventory.forEach(item => {
+                itemOptions += `<button onclick="useSpecificItem('${item}')">${item}</button>`;
+            });
+            
+            document.getElementById('story').textContent = "选择要使用的物品：";
+            document.getElementById('options').innerHTML = itemOptions + 
+                `<button onclick="backToInventory()">返回物品栏</button>`;
+        }
+
+        // 使用特定物品
+        function useSpecificItem(item) {
+            let outcome = "";
+            
+            if (item.includes("干粮") || item.includes("肉") || item.includes("浆果") || item.includes("蘑菇")) {
+                // 食物
+                gameState.hunger += 30;
+                if (gameState.hunger > 100) gameState.hunger = 100;
+                outcome = `你吃了${item}，恢复了一些饥饿值。`;
+                gameState.inventory = gameState.inventory.filter(i => i !== item);
+            } else if (item.includes("水壶")) {
+                gameState.hunger += 10;
+                outcome = "你喝了水壶里的水，稍微缓解了饥饿感。";
+            } else if (item.includes("药草")) {
+                gameState.health += 20;
+                if (gameState.health > 100) gameState.health = 100;
+                outcome = "你使用了药草，恢复了一些健康值。";
+                gameState.inventory = gameState.inventory.filter(i => i !== item);
+            } else if (item.includes("地图")) {
+                outcome = "你查看了地图，似乎指向森林的出口方向。";
+            } else {
+                outcome = `你不确定如何使用${item}。`;
+            }
+            
+            document.getElementById('story').textContent = outcome;
+            updateStats();
+            backToInventory();
+        }
+
+        // 制作物品
+        function craftItem() {
+            const craftableItems = [
+                { name: "陷阱", requires: ["干柴", "绳子"] },
+                { name: "简易药草", requires: ["蘑菇", "浆果"] },
+                { name: "火把", requires: ["干柴", "布料"] }
+            ];
+            
+            let craftOptions = "";
+            craftableItems.forEach(item => {
+                let canCraft = true;
+                for (const req of item.requires) {
+                    if (!gameState.inventory.includes(req)) {
+                        canCraft = false;
+                        break;
+                    }
+                }
+                
+                craftOptions += `<button ${canCraft ? '' : 'disabled'} onclick="craftSpecificItem('${item.name}')">${item.name} (${item.requires.join(', ')})</button>`;
+            });
+            
+            document.getElementById('story').textContent = "选择要制作的物品：";
+            document.getElementById('options').innerHTML = craftOptions + 
+                `<button onclick="backToInventory()">返回物品栏</button>`;
+        }
+
+        // 制作特定物品
+        function craftSpecificItem(itemName) {
+            const craftableItems = [
+                { name: "陷阱", requires: ["干柴", "绳子"] },
+                { name: "简易药草", requires: ["蘑菇", "浆果"] },
+                { name: "火把", requires: ["干柴", "布料"] }
+            ];
+            
+            const item = craftableItems.find(i => i.name === itemName);
+            
+            if (!item) {
+                document.getElementById('story').textContent = "无法制作该物品。";
+                return;
+            }
+            
+            // 检查材料
+            let canCraft = true;
+            for (const req of item.requires) {
+                if (!gameState.inventory.includes(req)) {
+                    canCraft = false;
+                    break;
+                }
+            }
+            
+            if (canCraft) {
+                // 消耗材料
+                for (const req of item.requires) {
+                    gameState.inventory = gameState.inventory.filter(i => i !== req);
+                }
+                
+                // 添加新物品
+                gameState.inventory.push(itemName);
+                
+                document.getElementById('story').textContent = `你成功制作了${itemName}！`;
+            } else {
+                document.getElementById('story').textContent = `你缺少制作${itemName}所需的材料。`;
+            }
+            
+            updateStats();
+            backToInventory();
+        }
+
+        // 建造结构
+        function buildStructure() {
+            const buildableStructures = [
+                { name: "庇护所", requires: ["干柴", "布料", "绳子"], effect: "rest" },
+                { name: "火堆", requires: ["干柴", "火把"], effect: "fire" }
+            ];
+            
+            let buildOptions = "";
+            buildableStructures.forEach(structure => {
+                let canBuild = true;
+                for (const req of structure.requires) {
+                    if (!gameState.inventory.includes(req)) {
+                        canBuild = false;
+                        break;
+                    }
+                }
+                
+                buildOptions += `<button ${canBuild ? '' : 'disabled'} onclick="buildSpecificStructure('${structure.name}')">${structure.name} (${structure.requires.join(', ')})</button>`;
+            });
+            
+            document.getElementById('story').textContent = "选择要建造的结构：";
+            document.getElementById('options').innerHTML = buildOptions + 
+                `<button onclick="backToInventory()">返回物品栏</button>`;
+        }
+
+        // 建造特定结构
+        function buildSpecificStructure(structureName) {
+            const buildableStructures = [
+                { name: "庇护所", requires: ["干柴", "布料", "绳子"], effect: "rest" },
+                { name: "火堆", requires: ["干柴", "火把"], effect: "fire" }
+            ];
+            
+            const structure = buildableStructures.find(s => s.name === structureName);
+            
+            if (!structure) {
+                document.getElementById('story').textContent = "无法建造该结构。";
+                return;
+            }
+            
+            // 检查材料
+            let canBuild = true;
+            for (const req of structure.requires) {
+                if (!gameState.inventory.includes(req)) {
+                    canBuild = false;
+                    break;
+                }
+            }
+            
+            if (canBuild) {
+                // 消耗材料
+                for (const req of structure.requires) {
+                    gameState.inventory = gameState.inventory.filter(i => i !== req);
+                }
+                
+                // 应用效果
+                if (structure.effect === "rest") {
+                    gameState.hasShelter = true;
+                    document.getElementById('story').textContent = "你建造了一个简易庇护所。现在休息时会更安全。";
+                } else if (structure.effect === "fire") {
+                    gameState.hasFire = true;
+                    document.getElementById('story').textContent = "你生了一堆火。现在你可以烹饪食物和保持温暖。";
+                }
+            } else {
+                document.getElementById('story').textContent = `你缺少建造${structureName}所需的材料。`;
+            }
+            
+            updateStats();
+            backToInventory();
+        }
+
+        // 返回物品栏
+        function backToInventory() {
+            checkInventory();
+        }
+
+        // 返回主界面
+        function backToMain() {
+            document.getElementById('story').textContent = "你站在森林中，思考着下一步该做什么。";
+            
+            const optionsElement = document.getElementById('options');
+            optionsElement.innerHTML = `
+                <button onclick="explore()">探索周围</button>
+                <button onclick="rest()">休息片刻</button>
+                <button onclick="hunt()">狩猎食物</button>
+                <button onclick="checkInventory()">查看物品</button>
+            `;
+        }
+
+        // 初始化游戏
+        window.onload = initGame;
+    </script>
+</body>
+</html>
