@@ -121,6 +121,14 @@
       {
         "text": "模拟钢琴",
         "link": "/tools/Analog_piano.html"
+      },
+      {
+        "text": "隐写工具",
+        "link": "/tools/Steganography_tools/index.html"
+      },
+      {
+        "text": "加密混淆工具",
+        "link": "/tools/Cryptographic_obfuscation_tool/index.html"
       }
     ]
   },

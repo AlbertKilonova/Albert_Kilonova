@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加密/混淆工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>加密/混淆工具</h1>
+        
+        <div class="input-section">
+            <textarea id="input-text" placeholder="输入要加密/混淆的文本..."></textarea>
+            <div class="file-upload">
+                <input type="file" id="file-input" accept="text/*">
+                <button id="upload-btn">上传文件</button>
+            </div>
+        </div>
+        
+        <div class="options-section">
+            <div class="option-group">
+                <h3>加密类型</h3>
+                <select id="encryption-type">
+                    <option value="none">无</option>
+                    <option value="base64">Base64</option>
+                    <option value="md5">MD5</option>
+                    <option value="caesar">Caesar Cipher</option>
+                    <option value="aes">AES</option>
+                    <option value="xor">XOR</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <h3>混淆类型</h3>
+                <select id="obfuscation-type">
+                    <option value="none">无</option>
+                    <option value="replace">字符替换</option>
+                    <option value="random-insert">随机插入字符</option>
+                    <option value="xor">XOR 混淆</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <h3>操作</h3>
+                <button id="encrypt-btn">加密/混淆</button>
+                <button id="decrypt-btn">解密/反混淆</button>
+                <button id="clear-btn">清空</button>
+                <button id="download-btn">下载结果</button>
+            </div>
+            
+            <div class="option-group">
+                <h3>密钥</h3>
+                <input type="password" id="encryption-key" placeholder="可选密钥">
+            </div>
+        </div>
+        
+        <div class="output-section">
+            <textarea id="output-text" placeholder="加密/混淆后的结果将显示在这里..." readonly></textarea>
+            <button id="copy-btn">复制结果</button>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
