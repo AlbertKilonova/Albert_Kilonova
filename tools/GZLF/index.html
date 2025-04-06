@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光之立方画社订单</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4a4a4a;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .order-result {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        .order-result h2 {
+            margin-top: 0;
+            color: #4a4a4a;
+        }
+        .order-details {
+            margin-top: 15px;
+        }
+        .order-details p {
+            margin: 8px 0;
+        }
+        .order-details strong {
+            color: #4CAF50;
+        }
+        .copy-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .copy-btn:hover {
+            background-color: #0b7dda;
+        }
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            display: none;
+        }
+        .save-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .save-btn:hover {
+            background-color: #e68a00;
+        }
+        .error {
+            color: red;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>光之立方画社订单</h1>
+        
+        <div class="form-group">
+            <label for="artist-id">画师ID (三位整数)</label>
+            <input type="text" id="artist-id" placeholder="请输入画师ID">
+            <div id="artist-id-error" class="error"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="order-type">订单类型</label>
+            <select id="order-type" disabled>
+                <option value="">加载中...</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="subtype-container" style="display: none;">
+            <label for="order-subtype">订单子类型</label>
+            <select id="order-subtype" disabled>
+                <option value="">请先选择订单类型</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="order-time">下单时间</label>
+            <input type="datetime-local" id="order-time">
+            <div id="order-time-error" class="error"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="scheduled-time">预计排到时间</label>
+            <input type="datetime-local" id="scheduled-time">
+            <div id="scheduled-time-error" class="error"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="deadline-time">截稿时间</label>
+            <input type="datetime-local" id="deadline-time">
+            <div id="deadline-time-error" class="error"></div>
+        </div>
+        
+        <button id="generate-btn" disabled>生成订单</button>
+        
+        <div class="order-result" id="order-result">
+            <h2>订单信息</h2>
+            <div class="order-details" id="order-details">
+                <!-- 订单信息将在这里显示 -->
+            </div>
+            <button class="copy-btn" id="copy-btn">复制订单ID</button>
+            <button class="save-btn" id="save-json-btn">保存订单JSON</button>
+            <button class="save-btn" id="save-image-btn">保存订单图片</button>
+        </div>
+        
+        <div class="loading" id="loading">正在加载数据...</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generate-btn');
+            const orderResult = document.getElementById('order-result');
+            const orderDetails = document.getElementById('order-details');
+            const copyBtn = document.getElementById('copy-btn');
+            const saveJsonBtn = document.getElementById('save-json-btn');
+            const saveImageBtn = document.getElementById('save-image-btn');
+            const orderTypeSelect = document.getElementById('order-type');
+            const orderSubtypeSelect = document.getElementById('order-subtype');
+            const subtypeContainer = document.getElementById('subtype-container');
+            const artistIdInput = document.getElementById('artist-id');
+            const artistIdError = document.getElementById('artist-id-error');
+            const orderTimeInput = document.getElementById('order-time');
+            const orderTimeError = document.getElementById('order-time-error');
+            const scheduledTimeInput = document.getElementById('scheduled-time');
+            const scheduledTimeError = document.getElementById('scheduled-time-error');
+            const deadlineTimeInput = document.getElementById('deadline-time');
+            const deadlineTimeError = document.getElementById('deadline-time-error');
+            const loadingText = document.getElementById('loading');
+            
+            let orderTypes = {};
+            let artists = [];
+            let selectedArtist = null;
+            
+            // 生成随机哈希值
+            function generateHash(length = 6) {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let hash = '';
+                for (let i = 0; i < length; i++) {
+                    hash += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return hash;
+            }
+            
+            // 生成订单ID
+            function generateOrderId(orderType, artistId) {
+                const studioCode = 'GZLF'; // 光之立方缩写
+                const date = new Date();
+                const formattedDate = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+                const timestamp = Date.now().toString().slice(-6); // 取时间戳的后6位
+                const hash = generateHash(6);
+                
+                return `${studioCode}-${orderTypes[orderType].code}-${formattedDate}-${timestamp}-${artistId}-${hash}`;
+            }
+            
+            // 格式化日期
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+            }
+            
+            // 验证画师ID
+            function validateArtistId(artistId) {
+                const regex = /^\d{3}$/;
+                return regex.test(artistId);
+            }
+            
+            // 根据画师ID查找画师信息
+            function findArtistById(artistId) {
+                return artists.find(artist => artist.id === artistId);
+            }
+            
+            // 复制订单ID到剪贴板
+            function copyOrderId(orderId) {
+                navigator.clipboard.writeText(orderId)
+                    .then(() => {
+                        alert('订单ID已复制到剪贴板！');
+                    })
+                    .catch(err => {
+                        console.error('无法复制: ', err);
+                        alert('复制失败，请手动复制订单ID');
+                    });
+            }
+            
+            // 保存订单JSON
+            function saveOrderJson(orderInfo) {
+                const dataStr = JSON.stringify(orderInfo, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+                saveAs(blob, `order_${orderInfo.orderId}.json`);
+            }
+            
+            // 保存订单图片
+            function saveOrderImage(orderInfo) {
+                // 创建一个临时的Canvas来渲染订单信息
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // 设置Canvas尺寸
+                const width = 600;
+                const height = 400;
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 绘制背景
+                ctx.fillStyle = '#f5f5f5';
+                ctx.fillRect(0, 0, width, height);
+                
+                // 绘制标题
+                ctx.font = 'bold 24px Microsoft YaHei';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.fillText('光之立方画社订单信息', width / 2, 50);
+                
+                // 绘制订单信息
+                ctx.font = '16px Microsoft YaHei';
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#333';
+                
+                let y = 100;
+                for (const key in orderInfo) {
+                    ctx.fillText(`${key}: ${orderInfo[key]}`, 50, y);
+                    y += 30;
+                }
+                
+                // 将Canvas内容转换为图片
+                const image = canvas.toDataURL('image/png');
+                
+                // 保存图片
+                const link = document.createElement('a');
+                link.download = `order_${orderInfo.orderId}.png`;
+                link.href = image;
+                link.click();
+            }
+            
+            // 从外部JSON加载数据
+            async function loadExternalData() {
+                try {
+                    // 加载订单类型
+                    const orderTypesResponse = await fetch('order-types.json');
+                    if (!orderTypesResponse.ok) {
+                        throw new Error('无法加载订单类型数据');
+                    }
+                    orderTypes = await orderTypesResponse.json();
+                    
+                    // 加载画师信息
+                    const artistsResponse = await fetch('artists.json');
+                    if (!artistsResponse.ok) {
+                        throw new Error('无法加载画师信息');
+                    }
+                    artists = await artistsResponse.json();
+                    
+                    // 填充订单类型下拉菜单
+                    orderTypeSelect.innerHTML = '';
+                    for (const type in orderTypes) {
+                        const option = document.createElement('option');
+                        option.value = type;
+                        option.textContent = type;
+                        orderTypeSelect.appendChild(option);
+                    }
+                    
+                    // 启用下拉菜单和按钮
+                    orderTypeSelect.disabled = false;
+                    generateBtn.disabled = false;
+                    
+                    // 隐藏加载提示
+                    loadingText.style.display = 'none';
+                } catch (error) {
+                    console.error(error);
+                    orderTypeSelect.innerHTML = '<option value="">加载失败，请刷新页面</option>';
+                    loadingText.textContent = '加载数据失败，请检查网络连接';
+                }
+            }
+            
+            // 处理订单类型变化
+            orderTypeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                if (selectedType) {
+                    // 填充子类型下拉菜单
+                    subtypeContainer.style.display = 'block';
+                    orderSubtypeSelect.disabled = false;
+                    
+                    orderSubtypeSelect.innerHTML = '';
+                    orderTypes[selectedType].subtypes.forEach(subtype => {
+                        const option = document.createElement('option');
+                        option.value = subtype;
+                        option.textContent = subtype;
+                        orderSubtypeSelect.appendChild(option);
+                    });
+                } else {
+                    subtypeContainer.style.display = 'none';
+                    orderSubtypeSelect.disabled = true;
+                }
+            });
+            
+            // 生成订单
+            generateBtn.addEventListener('click', function() {
+                // 重置错误信息
+                artistIdError.textContent = '';
+                orderTimeError.textContent = '';
+                scheduledTimeError.textContent = '';
+                deadlineTimeError.textContent = '';
+                
+                // 获取表单数据
+                const artistId = artistIdInput.value.trim();
+                const orderType = orderTypeSelect.value;
+                const orderSubtype = orderSubtypeSelect.value;
+                const orderTime = orderTimeInput.value;
+                const scheduledTime = scheduledTimeInput.value;
+                const deadlineTime = deadlineTimeInput.value;
+                
+                // 验证画师ID
+                if (!validateArtistId(artistId)) {
+                    artistIdError.textContent = '画师ID必须是三位整数';
+                    return;
+                }
+                
+                selectedArtist = findArtistById(artistId);
+                if (!selectedArtist) {
+                    artistIdError.textContent = '未找到匹配的画师ID，请检查输入';
+                    return;
+                }
+                
+                // 验证订单类型和子类型
+                if (!orderType || !orderSubtype) {
+                    alert('请选择订单类型和子类型');
+                    return;
+                }
+                
+                // 验证时间输入
+                if (!orderTime) {
+                    orderTimeError.textContent = '请选择下单时间';
+                    return;
+                }
+                
+                if (!scheduledTime) {
+                    scheduledTimeError.textContent = '请选择预计排到时间';
+                    return;
+                }
+                
+                if (!deadlineTime) {
+                    deadlineTimeError.textContent = '请选择截稿时间';
+                    return;
+                }
+                
+                // 生成订单ID
+                const orderId = generateOrderId(orderType, artistId);
+                
+                // 生成订单详情
+                const orderInfo = {
+                    orderId: orderId,
+                    artistId: selectedArtist.id,
+                    artistName: selectedArtist.name,
+                    orderType: orderType,
+                    orderSubtype: orderSubtype,
+                    orderTime: orderTime,
+                    scheduledTime: scheduledTime,
+                    deadlineTime: deadlineTime
+                };
+                
+                // 显示订单信息
+                orderDetails.innerHTML = `
+                    <p><strong>订单唯一ID:</strong> ${orderInfo.orderId}</p>
+                    <p><strong>画师ID:</strong> ${orderInfo.artistId}</p>
+                    <p><strong>画师昵称:</strong> ${orderInfo.artistName}</p>
+                    <p><strong>订单类型:</strong> ${orderInfo.orderType} (${orderInfo.orderSubtype})</p>
+                    <p><strong>下单时间:</strong> ${formatDate(orderInfo.orderTime)}</p>
+                    <p><strong>预计排到时间:</strong> ${formatDate(orderInfo.scheduledTime)}</p>
+                    <p><strong>截稿时间:</strong> ${formatDate(orderInfo.deadlineTime)}</p>
+                `;
+                
+                // 显示结果区域
+                orderResult.style.display = 'block';
+                
+                // 设置按钮事件
+                copyBtn.onclick = function() {
+                    copyOrderId(orderInfo.orderId);
+                };
+                
+                saveJsonBtn.onclick = function() {
+                    saveOrderJson(orderInfo);
+                };
+                
+                saveImageBtn.onclick = function() {
+                    saveOrderImage(orderInfo);
+                };
+            });
+            
+            // 加载外部数据
+            loadExternalData();
+        });
+    </script>
+</body>
+</html>

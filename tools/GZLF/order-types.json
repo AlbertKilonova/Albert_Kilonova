@@ -1,0 +1,32 @@
+{
+    "绘画": {
+        "subtypes": ["插画", "漫画", "壁纸", "头像", "概念设计"],
+        "processingTime": 3,
+        "completionTime": 10
+    },
+    "动画": {
+        "subtypes": ["短片", "广告", "MV", "GIF", "动态效果"],
+        "processingTime": 5,
+        "completionTime": 15
+    },
+    "cos": {
+        "subtypes": ["角色设计", "服装设计", "道具设计", "妆容设计"],
+        "processingTime": 2,
+        "completionTime": 7
+    },
+    "配音": {
+        "subtypes": ["角色配音", "旁白", "音效设计", "音效合成"],
+        "processingTime": 1,
+        "completionTime": 5
+    },
+    "设计": {
+        "subtypes": ["UI设计", "产品设计", "包装设计", "海报设计"],
+        "processingTime": 3,
+        "completionTime": 8
+    },
+    "其他": {
+        "subtypes": ["艺术指导", "创意咨询", "教学服务", "定制服务"],
+        "processingTime": 2,
+        "completionTime": 7
+    }
+}
