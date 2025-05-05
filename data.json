@@ -180,7 +180,17 @@
       "text": "Open Movies",
       "link": "https://www.123865.com/s/gSs1Td-dMTM"
     }]
-  }],
+  },{
+    "id": "Tipping",
+    "title": "打赏",
+    "type": "compound",
+    "blocks": [
+      {
+        "type": "text",
+        "content": "<p>好耶~</p><p>*伸出破碗</p><img src='imgs/Tipping.png' air='哎呀！图片跑丢了，钱钱飞飞呜呜。' width=80em>"
+      }]
+  }
+  ],
   "nav": [
   {
     "text": "联系",
