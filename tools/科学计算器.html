@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Design 3 科学计算器</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        :root {
+            /* Material Design 3 颜色系统 */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #410E0B;
+            --md-sys-color-shadow: #000000;
+            
+            --md-ref-typeface-plain: 'Roboto', sans-serif;
+            
+            /* 动画速度 */
+            --transition-speed: 0.3s;
+            --ripple-speed: 0.6s;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--md-ref-typeface-plain);
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), #8E6EE9);
+            padding: 20px;
+            transition: background var(--transition-speed);
+        }
+
+        .calculator-container {
+            width: 100%;
+            max-width: 380px;
+            background: var(--md-sys-color-surface);
+            border-radius: 28px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transform: translateY(0);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .display {
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            padding: 24px;
+            text-align: right;
+            position: relative;
+            transition: all var(--transition-speed);
+        }
+
+        .history {
+            min-height: 24px;
+            font-size: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+
+        .current-input {
+            font-size: 32px;
+            min-height: 48px;
+            margin-bottom: 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            scrollbar-width: none;
+            font-weight: 400;
+            transition: transform 0.2s;
+        }
+
+        .current-input:active {
+            transform: scale(0.98);
+        }
+
+        .current-input::-webkit-scrollbar {
+            display: none;
+        }
+
+        .result {
+            font-size: 40px;
+            font-weight: 500;
+            min-height: 56px;
+            color: var(--md-sys-color-primary);
+            transition: all 0.3s;
+            transform-origin: right;
+        }
+
+        .result.animate {
+            animation: pop 0.4s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .error {
+            color: var(--md-sys-color-error);
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 16px;
+            background: var(--md-sys-color-surface);
+        }
+
+        .button {
+            border: none;
+            border-radius: 16px;
+            padding: 16px 0;
+            font-size: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1/1;
+            transition: all 0.2s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(103, 80, 164, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width var(--ripple-speed), height var(--ripple-speed);
+        }
+
+        .button:active::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        .button:active {
+            transform: scale(0.95);
+        }
+
+        .button:hover {
+            background: rgba(103, 80, 164, 0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .operator {
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .function {
+            background: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            font-size: 18px;
+        }
+
+        .equals {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            grid-column: span 2;
+            aspect-ratio: unset;
+        }
+
+        .clear {
+            background: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+
+        .memory {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+        .history-container {
+            background: var(--md-sys-color-surface);
+            padding: 16px 20px;
+            max-height: 180px;
+            overflow-y: auto;
+            border-top: 1px solid var(--md-sys-color-outline);
+            transition: all var(--transition-speed);
+        }
+
+        .history-container h3 {
+            margin-bottom: 12px;
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+        }
+
+        .history-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--md-sys-color-outline);
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .history-item:active {
+            transform: translateX(5px);
+        }
+
+        .expression {
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 300;
+        }
+
+        .history-result {
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+
+        .material-icons {
+            font-size: 20px;
+            vertical-align: middle;
+            transition: transform 0.3s;
+        }
+
+        .keyboard-hint {
+            text-align: center;
+            padding: 12px 0;
+            background: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .keyboard-hint:hover {
+            background: rgba(103, 80, 164, 0.1);
+        }
+
+        .keyboard-hint:active .material-icons {
+            transform: translateY(2px);
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--md-sys-color-surface-variant);
+            padding: 0 16px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            position: relative;
+            transition: color var(--transition-speed);
+        }
+
+        .tab.active {
+            color: var(--md-sys-color-primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--md-sys-color-primary);
+            border-radius: 3px 3px 0 0;
+            animation: tabIndicator 0.3s ease-out;
+        }
+
+        @keyframes tabIndicator {
+            from { width: 0; left: 50%; }
+            to { width: 100%; left: 0; }
+        }
+
+        .scientific-pad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 0 16px 16px;
+            background: var(--md-sys-color-surface);
+        }
+
+        .calculator-title {
+            padding: 20px 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-text {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title-text .material-icons {
+            animation: spin 10s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .theme-toggle {
+            background: var(--md-sys-color-primary-container);
+            border: none;
+            border-radius: 16px;
+            padding: 8px 16px;
+            color: var(--md-sys-color-on-primary-container);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .theme-toggle:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .hidden-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .virtual-keyboard {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--md-sys-color-surface);
+            padding: 15px;
+            border-top: 1px solid var(--md-sys-color-outline);
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+
+        .virtual-keyboard.active {
+            transform: translateY(0);
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .keyboard-key {
+            flex: 1;
+            max-width: 60px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--md-sys-color-surface-variant);
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .keyboard-key:active {
+            transform: scale(0.95);
+            background: var(--md-sys-color-primary-container);
+        }
+
+        .keyboard-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            cursor: pointer;
+        }
+
+        @media (max-width: 400px) {
+            .button {
+                padding: 14px 0;
+                font-size: 18px;
+            }
+            
+            .current-input {
+                font-size: 28px;
+            }
+            
+            .result {
+                font-size: 36px;
+            }
+            
+            .calculator-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator-title">
+            <div class="title-text">
+                <i class="material-icons">calculate</i>
+                <span>科学计算器</span>
+            </div>
+        </div>
+        
+        <div class="display">
+            <div class="history" id="history"></div>
+            <div class="current-input" id="current-input">0</div>
+            <div class="result" id="result">0</div>
+            <input type="text" class="hidden-input" id="hidden-input">
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" id="basic-tab">基础</div>
+            <div class="tab" id="scientific-tab">科学</div>
+        </div>
+        
+        <div class="keypad" id="basic-keypad">
+            <button class="memory" onclick="memoryClear()">MC</button>
+            <button class="memory" onclick="memoryRecall()">MR</button>
+            <button class="memory" onclick="memoryAdd()">M+</button>
+            <button class="memory" onclick="memorySubtract()">M-</button>
+            <button class="clear" onclick="clearDisplay()">C</button>
+            
+            <button class="function" onclick="appendToDisplay('(')">(</button>
+            <button class="function" onclick="appendToDisplay(')')">)</button>
+            <button class="function" onclick="appendToDisplay('π')">π</button>
+            <button class="function" onclick="appendToDisplay('e')">e</button>
+            <button class="function" onclick="backspace()">
+                <i class="material-icons">backspace</i>
+            </button>
+            
+            <button class="function" onclick="appendToDisplay('^')">x^y</button>
+            <button class="function" onclick="appendToDisplay('sqrt(')">√</button>
+            <button class="function" onclick="appendToDisplay('%')">%</button>
+            <button class="function" onclick="appendToDisplay('!')">x!</button>
+            <button class="operator" onclick="appendToDisplay('/')">÷</button>
+            
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button class="operator" onclick="appendToDisplay('*')">×</button>
+            <button class="function" onclick="appendToDisplay('1/')">1/x</button>
+            
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button class="operator" onclick="appendToDisplay('-')">-</button>
+            <button class="function" onclick="appendToDisplay('10^')">10^x</button>
+            
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button class="operator" onclick="appendToDisplay('+')">+</button>
+            <button class="function" onclick="appendToDisplay('e^')">e^x</button>
+            
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="appendToDisplay('00')">00</button>
+            <button class="equals" onclick="calculateAndAddHistory()">=</button>
+        </div>
+        
+        <div class="scientific-pad" id="scientific-keypad" style="display:none">
+            <button class="function" onclick="appendToDisplay('sin(')">sin</button>
+            <button class="function" onclick="appendToDisplay('cos(')">cos</button>
+            <button class="function" onclick="appendToDisplay('tan(')">tan</button>
+            <button class="function" onclick="appendToDisplay('sinh(')">sinh</button>
+            <button class="function" onclick="appendToDisplay('cosh(')">cosh</button>
+            
+            <button class="function" onclick="appendToDisplay('asin(')">asin</button>
+            <button class="function" onclick="appendToDisplay('acos(')">acos</button>
+            <button class="function" onclick="appendToDisplay('atan(')">atan</button>
+            <button class="function" onclick="appendToDisplay('asinh(')">asinh</button>
+            <button class="function" onclick="appendToDisplay('acosh(')">acosh</button>
+            
+            <button class="function" onclick="appendToDisplay('log(')">log10</button>
+            <button class="function" onclick="appendToDisplay('ln(')">ln</button>
+            <button class="function" onclick="appendToDisplay('abs(')">abs</button>
+            <button class="function" onclick="appendToDisplay('exp(')">exp</button>
+            <button class="function" onclick="appendToDisplay('floor(')">floor</button>
+            
+            <button class="function" onclick="appendToDisplay('π')">π</button>
+            <button class="function" onclick="appendToDisplay('e')">e</button>
+            <button class="function" onclick="appendToDisplay('(')">(</button>
+            <button class="function" onclick="appendToDisplay(')')">)</button>
+            <button class="function" onclick="appendToDisplay('rand(')">rand</button>
+        </div>
+        
+        <div class="keyboard-hint" id="keyboard-toggle">
+            <i class="material-icons">keyboard</i> 唤起软键盘
+        </div>
+        
+        <div class="history-container">
+            <h3><i class="material-icons">history</i> 计算历史</h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+    
+    <div class="virtual-keyboard" id="virtual-keyboard">
+        <button class="keyboard-close" onclick="toggleKeyboard()">
+            <i class="material-icons">close</i>
+        </button>
+        <div class="keyboard-row">
+            <div class="keyboard-key" data-key="7">7</div>
+            <div class="keyboard-key" data-key="8">8</div>
+            <div class="keyboard-key" data-key="9">9</div>
+            <div class="keyboard-key" data-key="/">÷</div>
+            <div class="keyboard-key" data-key="*">×</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="keyboard-key" data-key="4">4</div>
+            <div class="keyboard-key" data-key="5">5</div>
+            <div class="keyboard-key" data-key="6">6</div>
+            <div class="keyboard-key" data-key="-">-</div>
+            <div class="keyboard-key" data-key="+">+</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="keyboard-key" data-key="1">1</div>
+            <div class="keyboard-key" data-key="2">2</div>
+            <div class="keyboard-key" data-key="3">3</div>
+            <div class="keyboard-key" data-key=".">.</div>
+            <div class="keyboard-key" data-key="(">(</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="keyboard-key" data-key="0">0</div>
+            <div class="keyboard-key" data-key="00">00</div>
+            <div class="keyboard-key" data-key=")">)</div>
+            <div class="keyboard-key" data-key="π">π</div>
+            <div class="keyboard-key" data-key="e">e</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="keyboard-key" data-key="^">^</div>
+            <div class="keyboard-key" data-key="!">!</div>
+            <div class="keyboard-key" data-key="%">%</div>
+            <div class="keyboard-key" data-key="backspace">⌫</div>
+            <div class="keyboard-key" data-key="clear">C</div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let memory = 0;
+        let history = [];
+        let isScientificMode = false;
+        
+        // 获取DOM元素
+        const currentInputElement = document.getElementById('current-input');
+        const resultElement = document.getElementById('result');
+        const historyElement = document.getElementById('history');
+        const historyListElement = document.getElementById('history-list');
+        const basicKeypad = document.getElementById('basic-keypad');
+        const scientificKeypad = document.getElementById('scientific-keypad');
+        const basicTab = document.getElementById('basic-tab');
+        const scientificTab = document.getElementById('scientific-tab');
+        const hiddenInput = document.getElementById('hidden-input');
+        const keyboardToggle = document.getElementById('keyboard-toggle');
+        const virtualKeyboard = document.getElementById('virtual-keyboard');
+        
+        // 标签切换功能
+        basicTab.addEventListener('click', () => {
+            basicKeypad.style.display = 'grid';
+            scientificKeypad.style.display = 'none';
+            basicTab.classList.add('active');
+            scientificTab.classList.remove('active');
+            isScientificMode = false;
+        });
+        
+        scientificTab.addEventListener('click', () => {
+            basicKeypad.style.display = 'none';
+            scientificKeypad.style.display = 'grid';
+            basicTab.classList.remove('active');
+            scientificTab.classList.add('active');
+            isScientificMode = true;
+        });
+        
+        // 添加内容到显示屏
+        function appendToDisplay(value) {
+            if (currentInputElement.textContent === '0' && value !== '.') {
+                currentInputElement.textContent = '';
+            }
+            currentInputElement.textContent += value;
+            calculate();
+        }
+        
+        // 清空显示屏
+        function clearDisplay() {
+            currentInputElement.textContent = '0';
+            resultElement.textContent = '0';
+            historyElement.textContent = '';
+            resultElement.classList.remove('error');
+            // 添加动画效果
+            resultElement.classList.add('animate');
+            setTimeout(() => resultElement.classList.remove('animate'), 400);
+        }
+        
+        // 内存功能
+        function memoryAdd() {
+            const result = parseFloat(resultElement.textContent);
+            if (!isNaN(result)) {
+                memory += result;
+                showNotification(`已添加到内存 (当前: ${memory})`);
+            }
+        }
+        
+        function memorySubtract() {
+            const result = parseFloat(resultElement.textContent);
+            if (!isNaN(result)) {
+                memory -= result;
+                showNotification(`已从内存减去 (当前: ${memory})`);
+            }
+        }
+        
+        function memoryRecall() {
+            currentInputElement.textContent = memory.toString();
+            calculate();
+        }
+        
+        function memoryClear() {
+            memory = 0;
+            showNotification('内存已清除');
+        }
+        
+        // 显示通知
+        function showNotification(message) {
+            historyElement.textContent = message;
+            setTimeout(() => {
+                historyElement.textContent = '';
+            }, 2000);
+        }
+        
+        // 主计算函数
+        function calculate() {
+            let expression = currentInputElement.textContent;
+            
+            if (expression === '0' || expression === '') {
+                resultElement.textContent = '0';
+                return;
+            }
+            
+            try {
+                // 使用正则表达式预处理表达式
+                expression = expression
+                    .replace(/\s+/g, '') // 移除所有空格
+                    .replace(/π/g, 'Math.PI') // 替换π
+                    .replace(/e/g, 'Math.E') // 替换e
+                    .replace(/\^/g, '**') // 替换^为**
+                    .replace(/sqrt\(/g, 'Math.sqrt(') // 替换sqrt
+                    .replace(/sin\(/g, 'Math.sin(') // 替换sin
+                    .replace(/cos\(/g, 'Math.cos(') // 替换cos
+                    .replace(/tan\(/g, 'Math.tan(') // 替换tan
+                    .replace(/asin\(/g, 'Math.asin(') // 替换asin
+                    .replace(/acos\(/g, 'Math.acos(') // 替换acos
+                    .replace(/atan\(/g, 'Math.atan(') // 替换atan
+                    .replace(/sinh\(/g, 'Math.sinh(') // 替换sinh
+                    .replace(/cosh\(/g, 'Math.cosh(') // 替换cosh
+                    .replace(/asinh\(/g, 'Math.asinh(') // 替换asinh
+                    .replace(/acosh\(/g, 'Math.acosh(') // 替换acosh
+                    .replace(/atanh\(/g, 'Math.atanh(') // 替换atanh
+                    .replace(/ln\(/g, 'Math.log(') // 替换ln
+                    .replace(/log\(/g, 'Math.log10(') // 替换log10
+                    .replace(/abs\(/g, 'Math.abs(') // 替换abs
+                    .replace(/exp\(/g, 'Math.exp(') // 替换exp
+                    .replace(/floor\(/g, 'Math.floor(') // 替换floor
+                    .replace(/rand\(/g, 'Math.random(') // 替换rand
+                    .replace(/1\//g, '1/') // 处理倒数
+                    .replace(/10\^/g, '10**') // 处理10的幂
+                    .replace(/e\^/g, 'Math.exp(') // 处理e的幂
+                    .replace(/(\d+)!/g, 'factorial($1)') // 处理阶乘
+                    .replace(/%/g, '/100'); // 处理百分比
+                
+                // 处理隐式乘法 (例如: 2π, 3(4+5))
+                expression = expression
+                    .replace(/(\d)([a-zA-Zπ\(])/g, '$1*$2')
+                    .replace(/(\))(\d)/g, '$1*$2')
+                    .replace(/(\))([a-zA-Zπ])/g, '$1*$2');
+                
+                // 使用Function构造函数进行计算
+                const result = Function('"use strict"; return (' + expression + ')')();
+                
+                // 处理结果
+                if (isNaN(result) || !isFinite(result)) {
+                    throw new Error('无效计算');
+                }
+                
+                // 显示结果
+                resultElement.textContent = formatResult(result);
+                resultElement.classList.remove('error');
+            } catch (error) {
+                resultElement.textContent = '错误';
+                resultElement.classList.add('error');
+            }
+        }
+        
+        // 格式化结果
+        function formatResult(num) {
+            // 如果是整数，直接返回
+            if (Number.isInteger(num)) {
+                return num.toString();
+            }
+            
+            // 处理科学计数法
+            if (Math.abs(num) > 1e12 || (Math.abs(num) < 1e-6 && num !== 0)) {
+                return num.toExponential(8).replace(/(\.\d*?[1-9])0+e/, '$1e');
+            }
+            
+            // 保留最多10位小数
+            let str = num.toFixed(10);
+            // 移除末尾的0和小数点
+            str = str.replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.0+$/, '');
+            return str;
+        }
+        
+        // 阶乘函数
+        function factorial(n) {
+            if (n === 0 || n === 1) return 1;
+            if (n > 100) return Infinity; // 防止过大阶乘
+            let result = 1;
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+        
+        // 添加历史记录
+        function addToHistory(expression, result) {
+            history.unshift({expression, result});
+            if (history.length > 5) history.pop();
+            
+            // 更新历史记录显示
+            historyListElement.innerHTML = '';
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <span class="expression">${item.expression}</span>
+                    <span class="history-result">= ${item.result}</span>
+                `;
+                historyListElement.appendChild(div);
+            });
+        }
+        
+        // 当点击等号时执行计算并添加历史记录
+        function calculateAndAddHistory() {
+            const expression = currentInputElement.textContent;
+            calculate();
+            
+            if (!resultElement.classList.contains('error')) {
+                addToHistory(expression, resultElement.textContent);
+                currentInputElement.textContent = resultElement.textContent;
+                // 添加动画效果
+                resultElement.classList.add('animate');
+                setTimeout(() => resultElement.classList.remove('animate'), 400);
+            }
+        }
+        
+        // 删除最后一个字符
+        function backspace() {
+            let currentText = currentInputElement.textContent;
+            if (currentText.length === 1) {
+                clearDisplay();
+            } else {
+                currentInputElement.textContent = currentText.slice(0, -1);
+                calculate();
+            }
+        }
+        
+        // 键盘支持
+        document.addEventListener('keydown', function(e) {
+            const key = e.key;
+            
+            // 数字键
+            if (/^\d$/.test(key)) {
+                appendToDisplay(key);
+                return;
+            }
+            
+            // 运算符
+            const operators = {
+                '+': '+',
+                '-': '-',
+                '*': '*',
+                '/': '/',
+                '.': '.',
+                '^': '^',
+                '!': '!',
+                '%': '%',
+                '(': '(',
+                ')': ')',
+                'p': 'π',
+                'e': 'e'
+            };
+            
+            if (operators.hasOwnProperty(key)) {
+                appendToDisplay(operators[key]);
+                return;
+            }
+            
+            // 特殊功能键
+            switch(key) {
+                case 'Enter':
+                case '=':
+                    calculateAndAddHistory();
+                    e.preventDefault();
+                    break;
+                case 'Escape':
+                    clearDisplay();
+                    break;
+                case 'Backspace':
+                    backspace();
+                    break;
+                case 's':
+                    if (isScientificMode) appendToDisplay('sin(');
+                    break;
+                case 'c':
+                    if (isScientificMode) appendToDisplay('cos(');
+                    break;
+                case 't':
+                    if (isScientificMode) appendToDisplay('tan(');
+                    break;
+                case 'q':
+                    appendToDisplay('sqrt(');
+                    break;
+                case 'l':
+                    if (isScientificMode) appendToDisplay('log(');
+                    break;
+                case 'n':
+                    if (isScientificMode) appendToDisplay('ln(');
+                    break;
+            }
+        });
+        
+        // 唤起软键盘
+        keyboardToggle.addEventListener('click', toggleKeyboard);
+        
+        function toggleKeyboard() {
+            virtualKeyboard.classList.toggle('active');
+        }
+        
+        // 虚拟键盘事件
+        document.querySelectorAll('.keyboard-key').forEach(key => {
+            key.addEventListener('click', function() {
+                const keyValue = this.getAttribute('data-key');
+                
+                if (keyValue === 'backspace') {
+                    backspace();
+                } else if (keyValue === 'clear') {
+                    clearDisplay();
+                } else {
+                    appendToDisplay(keyValue);
+                }
+            });
+        });
+        
+        // 点击显示区域唤起键盘
+        currentInputElement.addEventListener('click', function() {
+            hiddenInput.focus();
+        });
+        
+        hiddenInput.addEventListener('input', function() {
+            currentInputElement.textContent = this.value;
+            calculate();
+        });
+        
+        hiddenInput.addEventListener('focus', function() {
+            this.value = currentInputElement.textContent;
+        });
+        
+        // 初始显示
+        clearDisplay();
+    </script>
+</body>
+</html>

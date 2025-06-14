@@ -133,6 +133,14 @@
       {
         "text": "BPS",
         "link": "/tools/BPS.min.html"
+      },
+      {
+        "text": "音频可视化",
+        "link": "/tools/响度版.min.html"
+      },
+      {
+        "text": "科学计算器",
+        "link": "/tools/科学计算器.html"
       }
     ]
   },
