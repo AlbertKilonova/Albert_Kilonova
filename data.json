@@ -152,6 +152,10 @@
       {
         "text": "介绍",
         "link": "/games/help.html"
+      },
+      {
+        "text": "2048",
+        "link": "/games/2048.html"
       }
     ]
   },
