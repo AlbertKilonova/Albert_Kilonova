@@ -151,6 +151,10 @@
       {
         "text": "2048",
         "link": "/games/2048.html"
+      },
+      {
+        "text": "迷宫",
+        "link": "/games/迷宫.html"
       }
     ]
   },
